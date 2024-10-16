@@ -1,66 +1,50 @@
-import { Request, Response, RequestHandler } from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import User, { IUser } from '../models/user.model';
+import { Request, Response, NextFunction } from 'express';
+import { UserModel } from '../models/user.model';
+import catchAsync from '../utils/catchAsync';
+import { decrypt, encrypt, generateToken } from '../services/auth.service';
 
-const secret = 'your_jwt_secret';
-
-export const signup: RequestHandler = async (req: Request, res: Response): Promise<Response> => {
+// Create user
+export const createUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password } = req.body;
-  try {
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ msg: 'User already exists' });
-    }
 
-    user = new User({ name, email, password });
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
-    await user.save();
-
-    const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, secret, { expiresIn: 3600 });
-
-    return res.json({ token });
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.error('An unknown error occurred');
-    }
-    return res.status(500).send('Server error');
+  // Check if email is already registered
+  const existingUser = await UserModel.findOne({ email }).lean().exec();
+  if (existingUser) {
+    return res.status(400).json({ message: 'User with this email is already registered' });
   }
-};
 
-export const login: RequestHandler = async (req: Request, res: Response): Promise<Response> => {
+  // Hash password
+  const hashedPassword = await encrypt(password);
+  const user = await UserModel.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
+
+  if (!user) {
+    return res.status(500).json({ message: 'Failed to create user' });
+  }
+
+  return res.status(201).json({ message: 'User created successfully', user });
+});
+
+// User login
+export const loginUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
-    }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
-    }
-
-    const payload = { user: { id: user.id } };
-    const token = jwt.sign(payload, secret, { expiresIn: 3600 });
-
-    return res.json({ token });
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.error('An unknown error occurred');
-    }
-    return res.status(500).send('Server error');
+  // Find user by email
+  const user = await UserModel.findOne({ email }).lean().exec();
+  if (!user) {
+    return res.status(404).json({ message: `User with email ${email} not found` });
   }
-};
 
-export const logout: RequestHandler = (req: Request, res: Response): Response => {
-  return res.json({ msg: 'User logged out' });
-};
+  // Verify password
+  const validPassword = await decrypt(password, user.password);
+  if (!validPassword) {
+    return res.status(401).json({ message: 'Invalid password' });
+  }
+
+  // Create and send JWT token
+  const token = generateToken({ id: user._id, userType: 'user' });
+  return res.status(200).json({ message: 'Login successful', token, user });
+});

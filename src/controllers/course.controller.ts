@@ -1,91 +1,100 @@
-import { Request, Response } from 'express';
-import Course, { ICourse } from '../models/course.model';
+import { Request, Response, NextFunction } from "express";
+import { CourseModel } from "../models/course.model";
+import catchAsync from "../utils/catchAsync";
 
-export const getCourses = async (req: Request, res: Response): Promise<Response> => {
-  const { page = 1, limit = 10 } = req.query;
-  try {
-    const courses = await Course.find()
-      .limit(Number(limit))
-      .skip((Number(page) - 1) * Number(limit));
-    return res.json(courses);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.error('An unknown error occurred');
+// Get all courses
+export const getCourses = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const itemsPerPage = Number(req.query.itemsPerPage) || 10;
+    const pageCount = Number(req.query.pageCount) || 1;
+    const skip = itemsPerPage * (pageCount - 1);
+    const totalCourses = await CourseModel.countDocuments().exec();
+    const courses = await CourseModel.find()
+      .skip(skip)
+      .limit(itemsPerPage)
+      .lean()
+      .exec();
+
+    if (!!courses && courses.length === 0) {
+      return res.status(404).json({ message: "No courses found" });
     }
-    return res.status(500).send('Server error');
-  }
-};
 
-export const getCourse = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    const course = await Course.findById(req.params.id);
+    return res.status(200).json({
+      message: "Courses retrieved successfully",
+      data: {
+        courses,
+        currentPage: pageCount,
+        totalCourses,
+      },
+    });
+  }
+);
+
+// Get a single course by ID
+export const getCourse = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const course = await CourseModel.findById(id).lean().exec();
     if (!course) {
-      return res.status(404).json({ msg: 'Course not found' });
+      return res.status(404).json({ message: "Course not found" });
     }
-    return res.json(course);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.error('An unknown error occurred');
-    }
-    return res.status(500).send('Server error');
+    return res.status(200).json({
+      message: "Course retrieved successfully",
+      data: course,
+    });
   }
-};
+);
 
-export const createCourse = async (req: Request, res: Response): Promise<Response> => {
-  const { name, description } = req.body;
-  try {
-    const newCourse = new Course({ name, description });
-    const course = await newCourse.save();
-    return res.json(course);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.error('An unknown error occurred');
-    }
-    return res.status(500).send('Server error');
+// Create a new course
+export const createCourse = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { name, description, duration, instructor } = req.body;
+    const course = await CourseModel.create({
+      name,
+      description,
+      duration,
+      instructor,
+    });
+    return res.status(201).json({
+      message: "Course created successfully",
+      data: course,
+    });
   }
-};
+);
 
-export const updateCourse = async (req: Request, res: Response): Promise<Response> => {
-  const { name, description } = req.body;
-  try {
-    const course = await Course.findById(req.params.id);
+// Update a course by ID
+export const updateCourse = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { name, description, duration, instructor } = req.body;
+    const course = await CourseModel.findByIdAndUpdate(
+      id,
+      { name, description, duration, instructor },
+      { new: true }
+    )
+      .lean()
+      .exec();
     if (!course) {
-      return res.status(404).json({ msg: 'Course not found' });
+      return res.status(404).json({ message: "Course not found" });
     }
-    course.name = name || course.name;
-    course.description = description || course.description;
-    await course.save();
-    return res.json(course);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.error('An unknown error occurred');
-    }
-    return res.status(500).send('Server error');
+    return res.status(200).json({
+      message: "Course updated successfully",
+      data: course,
+    });
   }
-};
+);
 
-export const deleteCourse = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    const course = await Course.findById(req.params.id);
+// Delete a course by ID
+export const deleteCourse = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const course = await CourseModel.findByIdAndDelete(id).lean().exec();
     if (!course) {
-      return res.status(404).json({ msg: 'Course not found' });
+      return res.status(404).json({ message: "Course not found" });
     }
-    await course.remove();
-    return res.json({ msg: 'Course removed' });
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else {
-      console.error('An unknown error occurred');
-    }
-    return res.status(500).send('Server error');
+    return res.status(200).json({
+      message: "Course deleted successfully",
+      data: course,
+    });
   }
-};
+);

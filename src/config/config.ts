@@ -35,6 +35,7 @@ const config = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       autoIndex: false,
+      ssl: true,
     },
     strictQuery: envVars.MONGOOSE_STRICT_MODE,
   },
