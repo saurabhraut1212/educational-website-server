@@ -1,8 +1,13 @@
 import { Router } from "express";
-import { createContact } from "../../controllers/contact.controller";
+import {
+  createContact,
+  getAllContacts,
+  getContact,
+} from "../../controllers/contact.controller";
+import authMiddleware from "../../middleware/auth.middleware";
 
 export const contactRouter: Router = Router();
 
-contactRouter.post("/", createContact);
-contactRouter.get("/", createContact);
-
+contactRouter.post("/", authMiddleware(), createContact);
+contactRouter.get("/", authMiddleware(), getAllContacts);
+contactRouter.get("/:id", authMiddleware(), getContact);
