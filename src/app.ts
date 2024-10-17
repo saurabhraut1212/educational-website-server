@@ -17,6 +17,9 @@ app.use(cors(corsOptions));
 // parse json request body
 app.use(express.json());
 
+// enable cors
+app.use(cors({ origin: true, optionsSuccessStatus: 200 }));
+
 // v1 api routes
 app.use('/v1', router);
 
