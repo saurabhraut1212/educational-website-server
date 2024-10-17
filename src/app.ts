@@ -4,11 +4,18 @@ import cors from "cors";
 
 const app = express();
 
+const corsOptions = {
+  origin: 'https://educational-website-khaki.vercel.app/',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  preflightContinue: false,
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
+
 // parse json request body
 app.use(express.json());
-
-// enable cors
-app.use(cors({ origin: true, optionsSuccessStatus: 200 }));
 
 // v1 api routes
 app.use('/v1', router);
