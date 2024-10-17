@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 // enable cors
-app.use(cors({ origin: '*', optionsSuccessStatus: 200 }));
+app.use(cors({ origin: 'https://educational-website-khaki.vercel.app', optionsSuccessStatus: 200 }));
 
 // v1 api routes
 app.use('/v1', router);
