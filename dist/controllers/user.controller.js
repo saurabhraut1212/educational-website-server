@@ -12,13 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.manageCourseEnrollment = exports.updateUser = exports.loginUser = exports.createUser = void 0;
+exports.updateUser = exports.loginUser = exports.createUser = void 0;
 const user_model_1 = require("../models/user.model");
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const auth_service_1 = require("../services/auth.service");
 // Create user
 exports.createUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password } = req.body;
+    console.log(name, email, password);
     // Check if email is already registered
     const existingUser = yield user_model_1.UserModel.findOne({ email }).lean().exec();
     if (existingUser) {
@@ -38,22 +39,18 @@ exports.createUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(voi
     }
     return res.status(201).json({ message: "User created successfully", user });
 }));
-// User login
 exports.loginUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
-    // Find user by email
     const user = yield user_model_1.UserModel.findOne({ email }).lean().exec();
     if (!user) {
         return res
             .status(404)
             .json({ message: `User with email ${email} not found` });
     }
-    // Verify password
     const validPassword = yield (0, auth_service_1.decrypt)(password, user.password);
     if (!validPassword) {
         return res.status(401).json({ message: "Invalid password" });
     }
-    // Create and send JWT token
     const token = (0, auth_service_1.generateToken)({ id: user._id, userType: "user" });
     return res.status(200).json({ message: "Login successful", token, user });
 }));
@@ -111,28 +108,33 @@ exports.updateUser = (0, catchAsync_1.default)((req, res, next) => __awaiter(voi
         .json({ message: "User updated successfully", user: updatedUser });
 }));
 // Manage course enrollment
-exports.manageCourseEnrollment = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.params;
-    const { courseId } = req.body;
-    const user = yield user_model_1.UserModel.findById(userId).exec();
-    if (!user) {
-        return next(new Error(`User with Id: ${userId} not found`));
-    }
-    const courseIndex = user.courses.indexOf(courseId);
-    let update;
-    if (courseIndex === -1) {
-        update = { $push: { courses: courseId } };
-    }
-    else {
-        update = { $pull: { courses: courseId } };
-    }
-    const updatedUser = yield user_model_1.UserModel.findByIdAndUpdate(userId, update, {
-        new: true,
-    }).exec();
-    return res
-        .status(200)
-        .json({ message: "Course updated successfully", user: updatedUser });
-}));
+// export const manageCourseEnrollment = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const { userId } = req.params;
+//     const { courseId } = req.body;
+//
+//     const user = await UserModel.findById(userId).exec();
+//     if (!user) {
+//       return next(new Error(`User with Id: ${userId} not found`));
+//     }
+//
+//     const courseIndex = user.courses.indexOf(courseId);
+//     let update;
+//     if (courseIndex === -1) {
+//       update = { $push: { courses: courseId } };
+//     } else {
+//       update = { $pull: { courses: courseId } };
+//     }
+//
+//     const updatedUser = await UserModel.findByIdAndUpdate(userId, update, {
+//       new: true,
+//     }).exec();
+//
+//     return res
+//       .status(200)
+//       .json({ message: "Course updated successfully", user: updatedUser });
+//   }
+// );
 // Delete user
 // export const deleteUser = catchAsync(async (req, res, next) => {
 //   const { userId } = req.params;

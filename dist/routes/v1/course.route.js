@@ -11,5 +11,5 @@ exports.courseRouter = (0, express_1.Router)();
 exports.courseRouter.get("/", (0, auth_middleware_1.default)(), course_controller_1.getCourses);
 exports.courseRouter.get("/:id", (0, auth_middleware_1.default)(), course_controller_1.getCourse);
 exports.courseRouter.post("/", (0, auth_middleware_1.default)(), course_controller_1.createCourse);
-exports.courseRouter.patch("/:id", (0, auth_middleware_1.default)(), course_controller_1.updateCourse);
+exports.courseRouter.put("/:id", (0, auth_middleware_1.default)(), course_controller_1.updateCourse);
 exports.courseRouter.delete("/:id", (0, auth_middleware_1.default)(), course_controller_1.deleteCourse);

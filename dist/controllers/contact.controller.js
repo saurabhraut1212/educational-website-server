@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createContact = exports.getContact = exports.getAllContacts = void 0;
 const contact_model_1 = require("../models/contact.model");
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
-// Get all contacts
 exports.getAllContacts = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const itemsPerPage = Number(req.query.itemsPerPage) || 10;
     const pageCount = Number(req.query.pageCount) || 1;
@@ -38,7 +37,6 @@ exports.getAllContacts = (0, catchAsync_1.default)((req, res, next) => __awaiter
         },
     });
 }));
-// Get a single contact
 exports.getContact = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const contact = yield contact_model_1.ContactModel.findById(id).lean().exec();
@@ -50,7 +48,6 @@ exports.getContact = (0, catchAsync_1.default)((req, res, next) => __awaiter(voi
         data: contact,
     });
 }));
-// Create a new contact
 exports.createContact = (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, message } = req.body;
     const contact = yield contact_model_1.ContactModel.create({

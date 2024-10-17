@@ -7,7 +7,7 @@ import { decrypt, encrypt, generateToken } from "../services/auth.service";
 export const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, password } = req.body;
-
+    console.log(name,email,password);
     // Check if email is already registered
     const existingUser = await UserModel.findOne({ email }).lean().exec();
     if (existingUser) {
@@ -32,12 +32,12 @@ export const createUser = catchAsync(
   }
 );
 
-// User login
+
 export const loginUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
-    // Find user by email
+
     const user = await UserModel.findOne({ email }).lean().exec();
     if (!user) {
       return res
@@ -45,13 +45,11 @@ export const loginUser = catchAsync(
         .json({ message: `User with email ${email} not found` });
     }
 
-    // Verify password
     const validPassword = await decrypt(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    // Create and send JWT token
     const token = generateToken({ id: user._id, userType: "user" });
     return res.status(200).json({ message: "Login successful", token, user });
   }
@@ -116,33 +114,33 @@ export const updateUser = catchAsync(async (req, res, next) => {
 });
 
 // Manage course enrollment
-export const manageCourseEnrollment = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
-    const { courseId } = req.body;
-
-    const user = await UserModel.findById(userId).exec();
-    if (!user) {
-      return next(new Error(`User with Id: ${userId} not found`));
-    }
-
-    const courseIndex = user.courses.indexOf(courseId);
-    let update;
-    if (courseIndex === -1) {
-      update = { $push: { courses: courseId } };
-    } else {
-      update = { $pull: { courses: courseId } };
-    }
-
-    const updatedUser = await UserModel.findByIdAndUpdate(userId, update, {
-      new: true,
-    }).exec();
-
-    return res
-      .status(200)
-      .json({ message: "Course updated successfully", user: updatedUser });
-  }
-);
+// export const manageCourseEnrollment = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const { userId } = req.params;
+//     const { courseId } = req.body;
+//
+//     const user = await UserModel.findById(userId).exec();
+//     if (!user) {
+//       return next(new Error(`User with Id: ${userId} not found`));
+//     }
+//
+//     const courseIndex = user.courses.indexOf(courseId);
+//     let update;
+//     if (courseIndex === -1) {
+//       update = { $push: { courses: courseId } };
+//     } else {
+//       update = { $pull: { courses: courseId } };
+//     }
+//
+//     const updatedUser = await UserModel.findByIdAndUpdate(userId, update, {
+//       new: true,
+//     }).exec();
+//
+//     return res
+//       .status(200)
+//       .json({ message: "Course updated successfully", user: updatedUser });
+//   }
+// );
 
 // Delete user
 // export const deleteUser = catchAsync(async (req, res, next) => {

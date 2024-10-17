@@ -13,5 +13,5 @@ export const courseRouter: Router = Router();
 courseRouter.get("/", authMiddleware(), getCourses);
 courseRouter.get("/:id", authMiddleware(), getCourse);
 courseRouter.post("/", authMiddleware(), createCourse);
-courseRouter.patch("/:id", authMiddleware(), updateCourse);
+courseRouter.put("/:id", authMiddleware(), updateCourse);
 courseRouter.delete("/:id", authMiddleware(), deleteCourse);

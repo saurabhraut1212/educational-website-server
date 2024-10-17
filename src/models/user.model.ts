@@ -5,7 +5,7 @@ interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  courses: PopulatedDoc<Schema.Types.ObjectId & ICourse>[];
+  courses?: PopulatedDoc<Schema.Types.ObjectId & ICourse>[];
 }
 
 const userSchema = new Schema<IUser>({

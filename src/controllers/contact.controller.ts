@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ContactModel } from "../models/contact.model";
 import catchAsync from "../utils/catchAsync";
 
-// Get all contacts
+
 export const getAllContacts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const itemsPerPage = Number(req.query.itemsPerPage) || 10;
@@ -30,7 +30,7 @@ export const getAllContacts = catchAsync(
   }
 );
 
-// Get a single contact
+
 export const getContact = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
@@ -45,7 +45,7 @@ export const getContact = catchAsync(
   }
 );
 
-// Create a new contact
+
 export const createContact = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, message } = req.body;

@@ -13,7 +13,7 @@ export const generateToken = (data: Record<string, unknown>): string => {
 // Validate a JWT token
 export const validateToken = (token: string): Record<string, unknown> => {
   try {
-    const secret = config.jwt.secret || 'default_secret'; // Replace with your own JWT secret
+    const secret = config.jwt.secret || 'default_secret';
     const decoded = jwt.verify(token, secret) as Record<string, unknown>;
     return { isValid: true, data: decoded };
   } catch (err) {

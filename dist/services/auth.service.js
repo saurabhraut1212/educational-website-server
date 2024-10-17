@@ -28,7 +28,7 @@ exports.generateToken = generateToken;
 // Validate a JWT token
 const validateToken = (token) => {
     try {
-        const secret = config_1.default.jwt.secret || 'default_secret'; // Replace with your own JWT secret
+        const secret = config_1.default.jwt.secret || 'default_secret';
         const decoded = jsonwebtoken_1.default.verify(token, secret);
         return { isValid: true, data: decoded };
     }

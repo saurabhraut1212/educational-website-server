@@ -1,7 +1,18 @@
 import express, { NextFunction, Request, Response } from 'express';
 import router from './routes/v1/routes';
+import cors from "cors";
 
 const app = express();
+
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  preflightContinue: false,
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
 
 // parse json request body
 app.use(express.json());

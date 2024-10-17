@@ -8,6 +8,6 @@ import authMiddleware from "../../middleware/auth.middleware";
 
 export const contactRouter: Router = Router();
 
-contactRouter.post("/", authMiddleware(), createContact);
+contactRouter.post("/createContact",  createContact);
 contactRouter.get("/", authMiddleware(), getAllContacts);
 contactRouter.get("/:id", authMiddleware(), getContact);

@@ -2,8 +2,15 @@ import mongoose from 'mongoose';
 import { Server } from 'http';
 import config from './config/config';
 import app from './app';
+import cors from 'cors'; // Import CORS
+import { Request } from 'express';
 
 let server: Server;
+
+
+
+
+
 mongoose.set('strictQuery', config.mongoose.strictQuery);
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   console.log('Connected to MongoDB');

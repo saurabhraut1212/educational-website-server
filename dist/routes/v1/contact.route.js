@@ -8,6 +8,6 @@ const express_1 = require("express");
 const contact_controller_1 = require("../../controllers/contact.controller");
 const auth_middleware_1 = __importDefault(require("../../middleware/auth.middleware"));
 exports.contactRouter = (0, express_1.Router)();
-exports.contactRouter.post("/", (0, auth_middleware_1.default)(), contact_controller_1.createContact);
+exports.contactRouter.post("/createContact", contact_controller_1.createContact);
 exports.contactRouter.get("/", (0, auth_middleware_1.default)(), contact_controller_1.getAllContacts);
 exports.contactRouter.get("/:id", (0, auth_middleware_1.default)(), contact_controller_1.getContact);
